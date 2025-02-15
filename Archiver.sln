@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archiver.API", "Archiver.API\Archiver.API.csproj", "{7951E4B6-AD52-8946-F855-63E0141C96C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3F1E1A7-2AB7-4BE4-8C71-FEF4C1C58849}
+	EndGlobalSection
+EndGlobal
