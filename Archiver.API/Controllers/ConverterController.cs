@@ -12,7 +12,7 @@ using iText.Kernel.Pdf.Event;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using static System.Net.Mime.MediaTypeNames;
-using Archiver.API.PdfEventHandlers;
+using Archiver.API.Helpers;
 
 
 
@@ -53,9 +53,9 @@ namespace Archiver.API.Controllers
                     }
                      
                 }
-                if (model.Pictures != null)
+                if (model.Images != null)
                 {
-                    foreach (var image in model.Pictures)
+                    foreach (var image in model.Images)
                     {
                         if (image.Length > 0)
                         {
@@ -66,6 +66,7 @@ namespace Archiver.API.Controllers
                 }
                 string outputSource = Path.Combine(_options.outputDir, outputFile);
                 ZipFile.CreateFromDirectory(sourceFiles, outputSource);
+                Directory.Delete(sourceFiles);
                 return Ok();
             }
             catch(Exception ex)
@@ -76,7 +77,7 @@ namespace Archiver.API.Controllers
 
         private async Task HandleImages(IFormFile image, int docnum)
         {
-            using var engine = new TesseractEngine("tessdata", "rus+eng", EngineMode.LstmOnly);
+            using var engine = new TesseractEngine(tessDataPath, "rus+eng", EngineMode.LstmOnly);
             var memoryStream = new MemoryStream();
             await image.CopyToAsync(memoryStream);
             var bytes = memoryStream.ToArray();
@@ -89,7 +90,7 @@ namespace Archiver.API.Controllers
 
         private void ParseTextToPdf(string text, int pdfNum)
         {
-            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}");
+            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}.pdf");
             using var pdfWriter = new PdfWriter(outPath);
             using var pdf = new PdfDocument(pdfWriter);
             pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
@@ -97,8 +98,7 @@ namespace Archiver.API.Controllers
             doc.SetMargins(20, 20, 30, 20);
             var p = new Paragraph(text)
                 .SetTextAlignment(TextAlignment.LEFT)
-                .SetFontSize(14)
-                .SetFirstLineIndent(50);
+                .SetFontSize(14);
             doc.Add(p);
             doc.Close();
         }
@@ -110,7 +110,7 @@ namespace Archiver.API.Controllers
             using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
             using var page = await browser.NewPageAsync();
             await page.GoToAsync(url);
-            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}");
+            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}.pdf");
             await page.PdfAsync(outPath);
         }
 

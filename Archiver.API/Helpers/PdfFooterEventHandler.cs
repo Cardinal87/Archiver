@@ -5,7 +5,7 @@ using iText.Kernel.Pdf.Event;
 using iText.Layout;
 using System.Drawing;
 
-namespace Archiver.API.PdfEventHandlers
+namespace Archiver.API.Helpers
 {
     public class PdfFooterEventHandler : AbstractPdfDocumentEventHandler
     {

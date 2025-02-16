@@ -7,8 +7,8 @@ namespace Archiver.API.DTO
         
         public List<string> HtmlUrls { get; set; } = new List<string>();
 
-        [FileExtensions(Extensions = "png, jpeg, tiff, bmp")]
-        public IFormFileCollection? Pictures { get; set; }
+        
+        public IFormFileCollection? Images { get; set; }
 
     }
 }
