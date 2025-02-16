@@ -12,6 +12,7 @@ using iText.Kernel.Pdf.Event;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using static System.Net.Mime.MediaTypeNames;
+using Archiver.API.PdfEventHandlers;
 
 
 
@@ -91,8 +92,9 @@ namespace Archiver.API.Controllers
             var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}");
             using var pdfWriter = new PdfWriter(outPath);
             using var pdf = new PdfDocument(pdfWriter);
+            pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
             Document doc = new(pdf, iText.Kernel.Geom.PageSize.A4, false);
-            doc.SetMargins(20, 20, 20, 20);
+            doc.SetMargins(20, 20, 30, 20);
             var p = new Paragraph(text)
                 .SetTextAlignment(TextAlignment.LEFT)
                 .SetFontSize(14)
