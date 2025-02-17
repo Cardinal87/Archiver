@@ -13,6 +13,8 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using static System.Net.Mime.MediaTypeNames;
 using Archiver.API.Helpers;
+using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 
 
@@ -40,9 +42,9 @@ namespace Archiver.API.Controllers
                 if (model.HtmlUrls.Count != 0)
                 {
                     await saver.HanldeHtml(model.HtmlUrls);
-                     
+
                 }
-                if (model.Images != null)
+                if (model.Images.Count > 0)
                 {
                     await saver.HandleImages(model.Images);
                 }

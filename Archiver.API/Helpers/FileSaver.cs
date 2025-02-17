@@ -8,6 +8,7 @@ using Tesseract;
 using iText.Layout;
 using System.IO.Compression;
 using static System.Net.Mime.MediaTypeNames;
+using Archiver.API.DTO;
 
 namespace Archiver.API.Helpers
 {
@@ -29,11 +30,11 @@ namespace Archiver.API.Helpers
         }
 
 
-        public async Task HandleTextFiles(IFormFileCollection files)
+        public async Task HandleTextFiles(List<MyFileOptions> files)
         {
-            foreach (var file in files)
+            foreach (var file in files.Select(x => x.File))
             {
-                if (file.Length > 0)
+                if (file != null && file.Length > 0)
                 {
                     var reader = new StreamReader(file.OpenReadStream());
                     var text = await reader.ReadToEndAsync();
@@ -42,11 +43,11 @@ namespace Archiver.API.Helpers
             }
 
         }
-        public async Task HandleImages(IFormFileCollection images)
+        public async Task HandleImages(List<MyFileOptions> images)
         {
-            foreach (var image in images)
+            foreach (var image in images.Select(x => x.File))
             {
-                if (image.Length > 0)
+                if (image != null && image.Length > 0)
                 {
                     using var engine = new TesseractEngine(tessDataPath, "rus+eng", EngineMode.LstmOnly);
                     var memoryStream = new MemoryStream();
