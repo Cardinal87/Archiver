@@ -23,9 +23,6 @@ namespace Archiver.API.Controllers
     [ApiController]
     public class ConverterController : Controller
     {
-        private static string tessDataPath = "tessdata";
-        private static string sourceFiles = "files";
-        private static string outputFile = "files.zip";
         private OutputOptions _options;
 
         public ConverterController(IOptions<OutputOptions> options)
@@ -39,34 +36,21 @@ namespace Archiver.API.Controllers
         {
             try
             {
-                if (!Directory.Exists(sourceFiles))
-                {
-                    Directory.CreateDirectory(sourceFiles);
-                }
-                int pdfNum = 1;
+                var saver = new FileSaver();
                 if (model.HtmlUrls.Count != 0)
                 {
-                    foreach (var url in model.HtmlUrls)
-                    {
-                        await ParseHtmlToPdf(url, pdfNum);
-                        pdfNum++;
-                    }
+                    await saver.HanldeHtml(model.HtmlUrls);
                      
                 }
                 if (model.Images != null)
                 {
-                    foreach (var image in model.Images)
-                    {
-                        if (image.Length > 0)
-                        {
-                            await HandleImages(image, pdfNum);
-                            pdfNum++;
-                        }
-                    }
+                    await saver.HandleImages(model.Images);
                 }
-                string outputSource = Path.Combine(_options.outputDir, outputFile);
-                ZipFile.CreateFromDirectory(sourceFiles, outputSource);
-                Directory.Delete(sourceFiles);
+                if (model.TextFiles != null)
+                {
+                    await saver.HandleTextFiles(model.TextFiles);
+                }
+                saver.SaveToZip(_options.outputDir);
                 return Ok();
             }
             catch(Exception ex)
@@ -75,44 +59,7 @@ namespace Archiver.API.Controllers
             }
         }
 
-        private async Task HandleImages(IFormFile image, int docnum)
-        {
-            using var engine = new TesseractEngine(tessDataPath, "rus+eng", EngineMode.LstmOnly);
-            var memoryStream = new MemoryStream();
-            await image.CopyToAsync(memoryStream);
-            var bytes = memoryStream.ToArray();
-            var pix = Pix.LoadFromMemory(bytes);
-            using var page = engine.Process(pix);
-            var text = page.GetText();
-            ParseTextToPdf(text, docnum);
-        }
-
-
-        private void ParseTextToPdf(string text, int pdfNum)
-        {
-            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}.pdf");
-            using var pdfWriter = new PdfWriter(outPath);
-            using var pdf = new PdfDocument(pdfWriter);
-            pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
-            Document doc = new(pdf, iText.Kernel.Geom.PageSize.A4, false);
-            doc.SetMargins(20, 20, 30, 20);
-            var p = new Paragraph(text)
-                .SetTextAlignment(TextAlignment.LEFT)
-                .SetFontSize(14);
-            doc.Add(p);
-            doc.Close();
-        }
-
-
-        private async Task ParseHtmlToPdf(string url, int pdfNum)
-        {
-            await new BrowserFetcher().DownloadAsync();
-            using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
-            using var page = await browser.NewPageAsync();
-            await page.GoToAsync(url);
-            var outPath = Path.Combine(sourceFiles, $"pdf{pdfNum}.pdf");
-            await page.PdfAsync(outPath);
-        }
+        
 
     }
 }

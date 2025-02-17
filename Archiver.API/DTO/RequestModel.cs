@@ -6,9 +6,8 @@ namespace Archiver.API.DTO
     {
         
         public List<string> HtmlUrls { get; set; } = new List<string>();
-
-        
         public IFormFileCollection? Images { get; set; }
+        public IFormFileCollection? TextFiles { get; set; }
 
     }
 }
