@@ -39,19 +39,11 @@ namespace Archiver.API.Controllers
             try
             {
                 var saver = new FileSaver();
-                if (model.HtmlUrls.Count != 0)
-                {
-                    await saver.HanldeHtml(model.HtmlUrls);
-
-                }
-                if (model.Images.Count > 0)
-                {
-                    await saver.HandleImages(model.Images);
-                }
-                if (model.TextFiles != null)
-                {
-                    await saver.HandleTextFiles(model.TextFiles);
-                }
+                
+                await saver.HanldeHtml(model.HtmlUrls);
+                await saver.HandleImages(model.Images);
+                await saver.HandleTextFiles(model.TextFiles);
+                await saver.HandleRawFiles(model.OtherFiles);
                 saver.SaveToZip(_options.outputDir);
                 return Ok();
             }

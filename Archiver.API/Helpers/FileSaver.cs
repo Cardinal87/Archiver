@@ -30,6 +30,19 @@ namespace Archiver.API.Helpers
         }
 
 
+        public async Task HandleRawFiles(List<IFormFile> files)
+        {
+            foreach(var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    string outPath = Path.Combine(sourceFiles, file.FileName);
+                    using var fileStr = new FileStream(outPath, FileMode.Create);
+                    await file.CopyToAsync(fileStr);
+                }
+            }
+        }
+
         public async Task HandleTextFiles(List<MyFileOptions> files)
         {
             foreach (var file in files.Select(x => x.File))
@@ -39,6 +52,7 @@ namespace Archiver.API.Helpers
                     var reader = new StreamReader(file.OpenReadStream());
                     var text = await reader.ReadToEndAsync();
                     ParseTextToPdf(text);
+                    
                 }
             }
 
@@ -49,7 +63,7 @@ namespace Archiver.API.Helpers
             {
                 if (image != null && image.Length > 0)
                 {
-                    using var engine = new TesseractEngine(tessDataPath, "rus+eng", EngineMode.LstmOnly);
+                    using var engine = new TesseractEngine(tessDataPath, "rus", EngineMode.LstmOnly);
                     var memoryStream = new MemoryStream();
                     await image.CopyToAsync(memoryStream);
                     var bytes = memoryStream.ToArray();
@@ -113,7 +127,7 @@ namespace Archiver.API.Helpers
         {
             string outputSource = Path.Combine(outputDir, outputFile);
             ZipFile.CreateFromDirectory(sourceFiles, outputSource);
-            Directory.Delete(sourceFiles);
+            Directory.Delete(sourceFiles, true);
         }
     }
 }

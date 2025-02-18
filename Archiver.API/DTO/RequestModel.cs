@@ -1,5 +1,6 @@
 ﻿using Archiver.API.Helpers;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace Archiver.API.DTO
 {
@@ -14,5 +15,6 @@ namespace Archiver.API.DTO
         [AllowedExtensions("txt csv json xml log config ini html htm css py java cs")]
         public List<MyFileOptions> TextFiles { get; set; } = new();
 
+        public List<IFormFile> OtherFiles { get; set; } = new ();
     }
 }

@@ -24,6 +24,7 @@ namespace Archiver.API.Helpers
 
             new Canvas(page, pageSize)
                 .ShowTextAligned($"page {pagenum}", x, y, iText.Layout.Properties.TextAlignment.RIGHT)
+                .SetFontSize(12)
                 .Close();
         }
     }

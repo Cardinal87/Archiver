@@ -26,7 +26,7 @@ namespace Archiver.API.Helpers
                             ErrorMessage = "File has no extension";
                             return false;
                         }
-                        if (!_extensions.Any(x => ext == x))
+                        if (!_extensions.Any(x => ext.Substring(1) == x))
                         {
                             ErrorMessage = $"Invalid extension {ext}";
                             return false;

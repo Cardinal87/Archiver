@@ -3,7 +3,7 @@
     public class MyFileOptions
     {
         public IFormFile? File { get; set; }
-        public PdfOptions? Options { get; set; }
+        public PdfOptions Options { get; set; } = new PdfOptions();
 
     }
 }
