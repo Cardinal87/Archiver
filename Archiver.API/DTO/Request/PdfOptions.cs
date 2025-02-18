@@ -1,4 +1,4 @@
-﻿namespace Archiver.API.DTO
+﻿namespace Archiver.API.DTO.Request
 {
     public class PdfOptions
     {

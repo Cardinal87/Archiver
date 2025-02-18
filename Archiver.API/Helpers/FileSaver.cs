@@ -4,29 +4,37 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using PuppeteerSharp;
 using System.Diagnostics;
+using Archiver.API.DTO.Manifest;
 using Tesseract;
 using iText.Layout;
 using System.IO.Compression;
 using static System.Net.Mime.MediaTypeNames;
-using Archiver.API.DTO;
+using System.Security.Cryptography.Xml;
+using Archiver.API.DTO.Request;
+using System.Security.Cryptography;
+using Newtonsoft.Json;
 
 namespace Archiver.API.Helpers
 {
     public class FileSaver
     {
         private static string tessDataPath = "tessdata";
+        private static string manifestPath = "manifest.json";
         private static string sourceFiles = "files";
         private static string outputFile = "files.zip";
-        private int pdfNum;
-        private readonly object lk = new object();
-
+        private ManifestModel model;
         public FileSaver() 
         {
-            if (!Directory.Exists(sourceFiles))
+            if (Directory.Exists(sourceFiles))
             {
-                Directory.CreateDirectory(sourceFiles);
+                Directory.Delete(sourceFiles, true);
             }
-            pdfNum = 0;
+            Directory.CreateDirectory(sourceFiles);
+            if (File.Exists(manifestPath))
+            {
+                File.Delete(manifestPath);
+            }
+            model = new();
         }
 
 
@@ -51,8 +59,9 @@ namespace Archiver.API.Helpers
                 {
                     var reader = new StreamReader(file.OpenReadStream());
                     var text = await reader.ReadToEndAsync();
-                    ParseTextToPdf(text);
-                    
+                    string name = Path.GetFileNameWithoutExtension(file.FileName);
+                    var info = ParseTextToPdf(text, name);
+                    model.Content.Add(info);
                 }
             }
 
@@ -70,7 +79,9 @@ namespace Archiver.API.Helpers
                     var pix = Pix.LoadFromMemory(bytes);
                     using var page = engine.Process(pix);
                     var text = page.GetText();
-                    ParseTextToPdf(text);
+                    string name = Path.GetFileNameWithoutExtension(image.FileName);
+                    var info = ParseTextToPdf(text, name);
+                    model.Content.Add(info);
                 }
             }
             
@@ -80,20 +91,18 @@ namespace Archiver.API.Helpers
         {
             foreach(var url in urls)
             {
-                await ParseHtmlToPdf(url);
+                var uri = new Uri(url);
+                string name = uri.Host;
+                var info = await ParseHtmlToPdf(Uri.UnescapeDataString(url), name);
+                model.Content.Add(info);
+
             }
         }
 
 
-        private void ParseTextToPdf(string text)
+        private MyFileInfo ParseTextToPdf(string text, string name)
         {
-            int curNum = -1;
-            lock (lk)
-            {
-                curNum = pdfNum;
-                pdfNum++;
-            }
-            var outPath = Path.Combine(sourceFiles, $"pdf{curNum}.pdf");
+            var outPath = Path.Combine(sourceFiles, $"{name}.pdf");
             using var pdfWriter = new PdfWriter(outPath);
             using var pdf = new PdfDocument(pdfWriter);
             pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
@@ -104,30 +113,85 @@ namespace Archiver.API.Helpers
                 .SetFontSize(14);
             doc.Add(p);
             doc.Close();
+
+            var bytes = File.ReadAllBytes(outPath);
+            string crc = GetCRC(bytes);
+
+            var info = new MyFileInfo
+            {
+                Path = outPath,
+                Name = name,
+                Crc = crc,
+                Size = bytes.Length
+            };
+
+            return info;
+
         }
 
 
-        private async Task ParseHtmlToPdf(string url)
+        private async Task<MyFileInfo> ParseHtmlToPdf(string url, string name)
         {
-            int curNum = -1;
-            lock (lk)
-            {
-                curNum = pdfNum;
-                pdfNum++;
-            }
+            
             await new BrowserFetcher().DownloadAsync();
             using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
             using var page = await browser.NewPageAsync();
             await page.GoToAsync(url);
-            var outPath = Path.Combine(sourceFiles, $"pdf{curNum}.pdf");
+            var outPath = Path.Combine(sourceFiles, $"{name}.pdf");
             await page.PdfAsync(outPath);
+
+            var bytes = File.ReadAllBytes(outPath);
+            string crc = GetCRC(bytes);
+
+            var info = new MyFileInfo
+            {
+                Path = outPath,
+                Name = name,
+                Crc = crc,
+                Size = bytes.Length
+            };
+
+            return info;
         }
 
-        public void SaveToZip(string outputDir)
+        public async Task SaveToZip(string outputDir)
         {
             string outputSource = Path.Combine(outputDir, outputFile);
-            ZipFile.CreateFromDirectory(sourceFiles, outputSource);
+
+            using var zipStream = new FileStream(outputSource, FileMode.Create);
+            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
+
+            AddDirectoryToArchive(archive);
+            await AddManifestFile(archive);            
+
             Directory.Delete(sourceFiles, true);
+        }
+
+        private async Task AddManifestFile(ZipArchive archive)
+        {
+            model.ArchiveInfo.Compression = "Zip/Deflate";
+            model.ArchiveInfo.CreatedAt = DateTime.Now;
+            string json = JsonConvert.SerializeObject(model, Formatting.Indented);
+            await File.WriteAllTextAsync(manifestPath, json);
+            archive.CreateEntryFromFile(manifestPath, manifestPath);
+            File.Delete(manifestPath);
+        }
+
+        private void AddDirectoryToArchive(ZipArchive archive)
+        {
+            foreach(var file in Directory.GetFiles(sourceFiles))
+            {
+                string destPath = Path.Combine(sourceFiles, Path.GetFileName(file));
+                archive.CreateEntryFromFile(file, destPath);
+            }
+        }
+
+        private string GetCRC(byte[] bytes)
+        {
+            using var sha = SHA256.Create();
+            var crc = sha.ComputeHash(bytes);
+            string crsStr = BitConverter.ToString(crc);
+            return crsStr;
         }
     }
 }

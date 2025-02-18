@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Archiver.API.DTO;
+using Archiver.API.DTO.Request;
 namespace Archiver.API.Helpers
 {
     [AttributeUsage(AttributeTargets.Property)]

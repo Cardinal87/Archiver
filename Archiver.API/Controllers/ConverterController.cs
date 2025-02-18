@@ -1,5 +1,4 @@
-﻿using Archiver.API.DTO;
-using PuppeteerSharp;
+﻿using PuppeteerSharp;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -11,10 +10,10 @@ using iText.Layout;
 using iText.Kernel.Pdf.Event;
 using iText.Layout.Element;
 using iText.Layout.Properties;
-using static System.Net.Mime.MediaTypeNames;
 using Archiver.API.Helpers;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using Archiver.API.DTO.Request;
 
 
 
@@ -44,7 +43,7 @@ namespace Archiver.API.Controllers
                 await saver.HandleImages(model.Images);
                 await saver.HandleTextFiles(model.TextFiles);
                 await saver.HandleRawFiles(model.OtherFiles);
-                saver.SaveToZip(_options.outputDir);
+                await saver.SaveToZip(_options.outputDir);
                 return Ok();
             }
             catch(Exception ex)

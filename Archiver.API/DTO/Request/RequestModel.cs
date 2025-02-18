@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
-namespace Archiver.API.DTO
+namespace Archiver.API.DTO.Request
 {
     public class RequestModel
     {
