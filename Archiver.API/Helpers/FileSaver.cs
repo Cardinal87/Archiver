@@ -2,17 +2,19 @@
 using iText.Kernel.Pdf;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using iText.Kernel.Font;
 using PuppeteerSharp;
 using System.Diagnostics;
 using Archiver.API.DTO.Manifest;
 using Tesseract;
 using iText.Layout;
 using System.IO.Compression;
-using static System.Net.Mime.MediaTypeNames;
+
 using System.Security.Cryptography.Xml;
 using Archiver.API.DTO.Request;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
+using iText.IO.Font;
 
 namespace Archiver.API.Helpers
 {
@@ -22,6 +24,7 @@ namespace Archiver.API.Helpers
         private static string manifestPath = "manifest.json";
         private static string sourceFiles = "files";
         private static string outputFile = "files.zip";
+        private static string fontsPath = "fonts";
         private ManifestModel model;
         public FileSaver() 
         {
@@ -72,7 +75,7 @@ namespace Archiver.API.Helpers
             {
                 if (image != null && image.Length > 0)
                 {
-                    using var engine = new TesseractEngine(tessDataPath, "rus", EngineMode.LstmOnly);
+                    using var engine = new TesseractEngine(tessDataPath, "rus+eng", EngineMode.LstmOnly);
                     var memoryStream = new MemoryStream();
                     await image.CopyToAsync(memoryStream);
                     var bytes = memoryStream.ToArray();
@@ -106,11 +109,15 @@ namespace Archiver.API.Helpers
             using var pdfWriter = new PdfWriter(outPath);
             using var pdf = new PdfDocument(pdfWriter);
             pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
-            Document doc = new(pdf, iText.Kernel.Geom.PageSize.A4, false);
+            Document doc = new(pdf, iText.Kernel.Geom.PageSize.A4);
             doc.SetMargins(20, 20, 30, 20);
+            var arialPath = Path.Combine(fontsPath, "arial.ttf");
+            var font = PdfFontFactory.CreateFont(arialPath, PdfEncodings.IDENTITY_H);
             var p = new Paragraph(text)
                 .SetTextAlignment(TextAlignment.LEFT)
-                .SetFontSize(14);
+                .SetFontSize(14)
+                .SetFont(font);
+
             doc.Add(p);
             doc.Close();
 

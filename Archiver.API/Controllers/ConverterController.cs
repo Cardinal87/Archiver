@@ -43,7 +43,7 @@ namespace Archiver.API.Controllers
                 await saver.HandleImages(model.Images);
                 await saver.HandleTextFiles(model.TextFiles);
                 await saver.HandleRawFiles(model.OtherFiles);
-                await saver.SaveToZip(_options.outputDir);
+                //await saver.SaveToZip(_options.outputDir);
                 return Ok();
             }
             catch(Exception ex)

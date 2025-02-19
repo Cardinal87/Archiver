@@ -1,3 +1,6 @@
+using Archiver.API.DTO.Request;
+using System.Net;
+
 namespace Archiver.API
 {
     public class Program
@@ -5,21 +8,39 @@ namespace Archiver.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Host.UseWindowsService();
 
-            // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Configuration.AddJsonFile("appsettings.json")
+                .Build();
+
+
+            ConfigureServices(builder.Services, builder.Configuration);
+            
+            builder.WebHost.ConfigureKestrel(opt =>
+            {
+                opt.Listen(IPAddress.Loopback, 5091);
+            });
+            
 
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-
+            app.UseCors("MainPolicy");
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
+        }
+        private static void ConfigureServices(IServiceCollection services, IConfiguration conf)
+        {
+            services.AddControllers();
+            services.AddCors(set =>
+            {
+                set.AddPolicy("MainPolicy", opt => {
+                    opt.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .WithMethods("POST");
+                });
+            });
+            services.Configure<OutputOptions>(conf.GetSection(OutputOptions.Section));
         }
     }
 }
