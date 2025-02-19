@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "ArchiverExtension",
+  "version": "1.0",
+  "description": "helps to save files into zip archive",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "scripting",
+    "fileSystem"
+
+
+  ],
+  "host_permissions": [
+    "http://localhost:5091/*"
+  ],
+  "background": {
+    //"service_worker": "/scripts/background.js"
+  },
+  "icons": {
+    "60": "img/icons60.png"
+  },
+  "content_scripts": [
+    
+  ],
+  "action": {
+    "default_icon": "img/icons60.png",
+    "default_popup": "/html/popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}

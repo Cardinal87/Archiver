@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35806.99
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archiver.API", "Archiver.API\Archiver.API.csproj", "{7951E4B6-AD52-8946-F855-63E0141C96C9}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Archiver", "Archiver\Archiver.esproj", "{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,12 @@ Global
 		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7951E4B6-AD52-8946-F855-63E0141C96C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1E90DB-780A-C30C-AA97-B6C52E5A3471}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
