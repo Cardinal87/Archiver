@@ -1,0 +1,169 @@
+:root {
+    --drag-zone-background: #1A1A1A;
+    --drag-zone-border: #404040;
+    --drag-zone-active-border: #00F0FF;
+    --drag-zone-gradient-first: #00F0FF22;
+    --drag-zone-gradient-second: transparent;
+    --drag-zone-font-color: #8B8B8B;
+    --files-border: #404040;
+    --files-background: #1A1A1A;
+    --files-font-color: #E0E0E0;
+    --files-icons: #606060;
+    --files-icons-hover: #00F0FF;
+    --button-save-background: #00F0FF;
+    --button-save-border: #00F0FF;
+    --button-save-font-color: #0F0F0F;
+    --button-save-shadow: #00F0FF80;
+    --button-save-hover-background: #00DDEB;
+    --button-cancel-backgroung: transparent;
+    --button-cancel-font-color: #8B8B8B;
+    --button-cancel-border: #404040;
+    --button-cancel-border-hover: #00F0FF;
+    --li-hover-background: #262626;
+    --ul-scrollbar-background: #1A1A1A;
+    --ul-scrollbar-track: #0F0F0F;
+    --ul-scrollbar-thumb: #404040;
+    --ul-scrollbar-thumb-border: #262626;
+    --ul-scrollbar-thumb-hover: #606060;
+}
+
+
+body {
+    font-size:0;
+    margin:0px;
+}
+div.main{
+    height:250px;
+    width:200px;
+}
+div.files {
+    height: 100%;
+    width: 100%;
+    background-color: var(--files-background);
+    border: 1px solid var(--files-border);
+    text-align: center;
+    display: inline-block;
+}
+div.drag-zone {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: var(--drag-zone-background);
+    border: 1px solid var(--drag-zone-border);
+    display: none;
+}
+div.drag-zone-active {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background: linear-gradient(45deg, var(--drag-zone-gradient-first), var(--drag-zone-gradient-second));
+    border: 1px solid var(--drag-zone-active-border);
+    background-color: var(--drag-zone-background);
+}
+h3.drag-zone-text {
+    margin-top: 0px;
+    font-size: 15px;
+    color: var(--drag-zone-font-color);
+}
+h3.files-text {
+    margin: 10px 0px 0px 0px;
+    font-size: 20px;
+    color: var(--files-font-color);
+}
+svg.cloud {
+    width: 100px;
+    height: 100px;
+    margin-top: 65px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: var(--drag-zone-font-color)
+}
+svg.file-icon{
+    fill: var(--files-icons);
+}
+svg.settings-icon {
+    fill: var(--files-icons);
+    
+}
+svg.settings-icon:hover{
+    fill: var(--files-icons-hover)
+}
+button.save {
+    background-color: var(--button-save-background);
+    color: var(--button-save-font-color);
+    padding: 2px 10px 2px 10px;
+    border: 1px solid var(--button-save-border);
+    border-radius: 5px;
+}
+button.save:hover {
+    background-color: var(--button-save-hover-background);
+    box-shadow: 0 0 12px var(--button-save-shadow);
+}
+button.cancel {
+    background-color: var(--button-cancel-backgroung);
+    color: var(--button-cancel-font-color);
+    padding: 2px 10px 2px 10px;
+    border: 1px solid var(--button-cancel-border);
+    border-radius: 5px;
+    transition: all 0.3s;
+    margin: 15px 10px 0px 0px;
+}
+button.cancel:hover {
+    animation: cancel-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+ul.files{
+    margin-top: 15px;
+    height: 155px;
+    max-height: 155px;
+    padding-left: 10px;
+    overflow-y: auto;
+}
+ul.files::-webkit-scrollbar{
+    width: 9px;
+    background-color: var(--ul-scrollbar-background)
+}
+ul.files::-webkit-scrollbar-track {
+    background-color: var(--ul-scrollbar-track);    
+    border-radius: 4px;
+}
+ul.files::-webkit-scrollbar-thumb{
+    background-color:  var(--ul-scrollbar-thumb);
+    border: 1px solid var(--ul-scrollbar-thumb-border);
+    transition: all 0.3s;
+    border-radius: 4px;
+}
+ul.files::-webkit-scrollbar-thumb:hover{
+    background-color: var(--ul-scrollbar-thumb-hover);
+}
+li.file-line {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+li.file-line:hover{
+    background-color: var(--li-hover-background)
+}
+p.file-name{
+    font-size: 14px;
+    color: var(--files-font-color);
+    margin: 0;
+    width: 125px;
+    text-align: left;
+}
+
+
+@keyframes cancel-pulse{
+    0% {
+        border-color: var(--button-cancel-border);
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.2);
+    }
+    50% {
+        border-color: var(--button-cancel-border-hover);
+        box-shadow: 0 0 0 4px rgba(0, 240, 255, 0);
+    }
+    100% {
+        border-color: var(--button-cancel-border);
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+    }
+}

@@ -4,18 +4,27 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
+    <link rel="stylesheet" href="popup.css"/>
 </head>
 <body>
-    <div>
-        <div id="dragZone">
-            <h3>drag files here</h3>
+    <div class="main">
+        <div id="dragZone" class="drag-zone">
+            <svg viewBox="0 0 23.5 25" stroke-width="1.2" class="cloud">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9" />
+                <path d="m16 16-4-4-4 4" />
+            </svg>
+            <h3 class="drag-zone-text">drag file here</h3>
         </div>
-        <div>
-            <ul id="files">
-
+        <div id="files" class="files">
+            <h3 class=files-text>Files</h3>
+            <ul id="files" class="files">
+                
             </ul>
+            <button class="cancel">Cancel</button>
+            <button class="save">Save</button>
         </div>
 
     </div>
+    <script src="/scripts/popup.js"></script>
 </body>
 </html>
