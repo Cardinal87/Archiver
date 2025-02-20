@@ -42,7 +42,7 @@ div.files {
     background-color: var(--files-background);
     border: 1px solid var(--files-border);
     text-align: center;
-    display: inline-block;
+    display: none;
 }
 div.drag-zone {
     height: 100%;
@@ -51,6 +51,7 @@ div.drag-zone {
     background-color: var(--drag-zone-background);
     border: 1px solid var(--drag-zone-border);
     display: none;
+    
 }
 div.drag-zone-active {
     height: 100%;
@@ -64,6 +65,7 @@ h3.drag-zone-text {
     margin-top: 0px;
     font-size: 15px;
     color: var(--drag-zone-font-color);
+    pointer-events: none;
 }
 h3.files-text {
     margin: 10px 0px 0px 0px;
@@ -77,7 +79,9 @@ svg.cloud {
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
-    stroke: var(--drag-zone-font-color)
+    stroke: var(--drag-zone-font-color);
+    pointer-events: none;
+
 }
 svg.file-icon{
     fill: var(--files-icons);
@@ -110,13 +114,13 @@ button.cancel {
     margin: 15px 10px 0px 0px;
 }
 button.cancel:hover {
-    animation: cancel-pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: cancel-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 ul.files{
     margin-top: 15px;
     height: 155px;
     max-height: 155px;
-    padding-left: 10px;
+    padding-left: 8px;
     overflow-y: auto;
 }
 ul.files::-webkit-scrollbar{
