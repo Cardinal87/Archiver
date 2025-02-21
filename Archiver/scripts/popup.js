@@ -1,8 +1,19 @@
 const otherFiles = new FormData();
+const STORAGE_KEY = "storagedFiles";
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const dropZone = document.getElementById('dragZone');
-    dropZone.style.display = 'inline-block';
+    const fileZone = document.getElementById('files');
+    await loadFilesFromStorage();
+
+    if (Array.from(otherFiles.keys()).length === 0) {
+        dropZone.style.display = 'inline-block';
+    }
+    else {
+        fileZone.style.display = 'inline-block';
+    }
+
+    
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.remove('drag-zone');
@@ -12,8 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         dropZone.classList.add('drag-zone');
         dropZone.classList.remove('drag-zone-active');
+        if (Array.from(otherFiles.keys()).length === 0) {
+            dropZone.style.display = 'inline-block';
+            fileZone.style.display = 'none';
+        }
+        else {
+            dropZone.style.display = 'none';
+            fileZone.style.display = 'inline-block';
+        }
     });
-    dropZone.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', async (e) => {
         e.preventDefault();
         dropZone.classList.add('drag-zone');
         dropZone.classList.remove('drag-zone-active');
@@ -23,13 +42,60 @@ document.addEventListener('DOMContentLoaded', () => {
         dropZone.style.display = 'none';
         document.getElementById('files').style.display = 'inline-block';
 
+
+        await saveToStorage(file).catch((error) => console.error(error));
+        
+        
         otherFiles.append('file', file);
 
         addFile(file);
     });
+    fileZone.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-zone');
+        dropZone.classList.add('drag-zone-active');
+        dropZone.style.display = 'inline-block';
+        fileZone.style.display = 'none';
+    });
 
 });
 
+async function saveToStorage(file) {
+    return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+
+        reader.onload = async () => {
+            let { [STORAGE_KEY]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_KEY);
+            const fileData = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: reader.result.split(',')[1]
+            };
+
+            await chrome.storage.local.set({ [STORAGE_KEY]: [...storagedFiles, fileData] });
+            resolve();
+        };
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+
+    });
+}
+
+async function loadFilesFromStorage(){
+    let { [STORAGE_KEY]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_KEY);
+    for (var fileData of storagedFiles) {
+        const byteStr = atob(fileData.data);
+        const array = new Uint8Array(byteStr.length);
+        for (let i = 0; i < array.length; i++) {
+            array[i] = byteStr.charCodeAt(i);
+        }
+        const file = new File([array], fileData.name, { type: fileData.type });
+        addFile(file);
+        otherFiles.append('file',file);
+
+    }
+}
 
 function addFile(file) {
     const settingIcon = `<svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24">
