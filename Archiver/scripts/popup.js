@@ -1,12 +1,18 @@
-const otherFiles = new FormData();
+const otherFiles = [];
+const images = [];
+const textFiles = [];
 const STORAGE_KEY = "storagedFiles";
+
+const allowedImages = new Set(["image/jpeg", "image/jpg", "image/png"]);
+const allowedTextFiles = new Set(['txt', 'csv', 'json', 'xml', 'log', 'config', 'ini', 'html', 'htm', 'css', 'py', 'java', 'cs']);
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const dropZone = document.getElementById('dragZone');
     const fileZone = document.getElementById('files');
     await loadFilesFromStorage();
 
-    if (Array.from(otherFiles.keys()).length === 0) {
+    if (otherFiles.length === 0 && images.length === 0 && textFiles.length === 0) {
         dropZone.style.display = 'inline-block';
     }
     else {
@@ -23,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         dropZone.classList.add('drag-zone');
         dropZone.classList.remove('drag-zone-active');
-        if (Array.from(otherFiles.keys()).length === 0) {
+        if (otherFiles.length === 0 && images.length === 0 && textFiles.length === 0) {
             dropZone.style.display = 'inline-block';
             fileZone.style.display = 'none';
         }
@@ -37,18 +43,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         dropZone.classList.add('drag-zone');
         dropZone.classList.remove('drag-zone-active');
         const file = e.dataTransfer?.files[0];
-        if (!file) return;
+        let parts = file.name.split('.');
+        if (!file || file.name.split('.').length === 1) {
+            document.getElementById('warning').style.visibility = 'visible';
+            setTimeout(() => {
+                document.getElementById('warning').style.visibility = 'hidden';
+                if (otherFiles.length !== 0 || images.length !== 0 && textFiles.length !== 0) {
+                    dropZone.style.display = 'none';
+                    document.getElementById('files').style.display = 'inline-block';
+                }
+            }, 2000);
+            return;
+        }
+        else if (allowedImages.has(file.type)) {
+            images.push(file);
+            addFile(file, true);
+        }
 
+        else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
+            textFiles.push(file);
+            addFile(file, true);
+        }
+        else {
+            otherFiles.push(file);
+            addFile(file, false);
+        }
         dropZone.style.display = 'none';
         document.getElementById('files').style.display = 'inline-block';
-
-
         await saveToStorage(file).catch((error) => console.error(error));
-        
-        
-        otherFiles.append('file', file);
 
-        addFile(file);
     });
     fileZone.addEventListener('dragenter', (e) => {
         e.preventDefault();
@@ -91,13 +114,24 @@ async function loadFilesFromStorage(){
             array[i] = byteStr.charCodeAt(i);
         }
         const file = new File([array], fileData.name, { type: fileData.type });
-        addFile(file);
-        otherFiles.append('file',file);
+        let parts = file.name.split('.');
+        if (allowedImages.has(file.type)) {
+            images.push(file);
+            addFile(file, true);
+        }
+        else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
+            textFiles.push(file);
+            addFile(file, true);
+        }
+        else {
+            otherFiles.push(file);
+            addFile(file, false);
+        }
 
     }
 }
 
-function addFile(file) {
+function addFile(file, addBt) {
     const settingIcon = `<svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24">
     <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 
     15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 
@@ -116,9 +150,15 @@ function addFile(file) {
 
     const li = document.createElement('li');
     li.className = 'file-line';
-    li.innerHTML = `${fileIcon}
-    <p class="file-name">${file.name}</p>
-    ${settingIcon}`;
+    if (addBt) {
+        li.innerHTML = `${fileIcon}
+        <p class="file-name">${file.name}</p>
+        ${settingIcon}`;
+    }
+    else {
+        li.innerHTML = `${fileIcon}
+        <p class="file-name">${file.name}</p>`;
+    }
 
     
     const ul = document.getElementById('file-list');

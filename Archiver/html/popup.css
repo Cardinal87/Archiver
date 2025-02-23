@@ -25,6 +25,7 @@
     --ul-scrollbar-thumb: #404040;
     --ul-scrollbar-thumb-border: #262626;
     --ul-scrollbar-thumb-hover: #606060;
+    --warning: #FF2079;
 }
 
 
@@ -122,6 +123,7 @@ ul.files{
     max-height: 155px;
     padding-left: 8px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 ul.files::-webkit-scrollbar{
     width: 9px;
@@ -152,8 +154,16 @@ p.file-name{
     font-size: 14px;
     color: var(--files-font-color);
     margin: 0;
-    width: 125px;
+    width: 120px;
+    overflow: hidden;
     text-align: left;
+}
+p.warning {
+    font-size: 14px;
+    color: var(--warning);
+    margin: 0;
+    visibility: hidden;
+    
 }
 
 
