@@ -1,4 +1,5 @@
 using Archiver.API.DTO.Request;
+using Microsoft.AspNetCore.Http.Features;
 using System.Net;
 
 namespace Archiver.API
@@ -16,10 +17,10 @@ namespace Archiver.API
 
 
             ConfigureServices(builder.Services, builder.Configuration);
-            
             builder.WebHost.ConfigureKestrel(opt =>
             {
                 opt.Listen(IPAddress.Loopback, 5091);
+                opt.Limits.MaxRequestBodySize = 1024 * 1024 * 512;
             });
             
 

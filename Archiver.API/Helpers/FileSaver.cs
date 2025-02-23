@@ -105,7 +105,8 @@ namespace Archiver.API.Helpers
 
         private MyFileInfo ParseTextToPdf(string text, string name)
         {
-            var outPath = Path.Combine(sourceFiles, $"{name}.pdf");
+            var fileName = GetValidName($"{name}.pdf");
+            var outPath = Path.Combine(sourceFiles, fileName);
             using var pdfWriter = new PdfWriter(outPath);
             using var pdf = new PdfDocument(pdfWriter);
             pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, new PdfFooterEventHandler());
@@ -144,7 +145,8 @@ namespace Archiver.API.Helpers
             using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
             using var page = await browser.NewPageAsync();
             await page.GoToAsync(url);
-            var outPath = Path.Combine(sourceFiles, $"{name}.pdf");
+            var fileName = GetValidName($"{name}.pdf");
+            var outPath = Path.Combine(sourceFiles, fileName);
             await page.PdfAsync(outPath);
 
             var bytes = File.ReadAllBytes(outPath);
@@ -199,6 +201,20 @@ namespace Archiver.API.Helpers
             var crc = sha.ComputeHash(bytes);
             string crsStr = BitConverter.ToString(crc);
             return crsStr;
+        }
+
+        private string GetValidName(string fileName)
+        {
+            int num = 1;
+            string outPath = Path.Combine(sourceFiles, fileName);
+            int ind = outPath.LastIndexOf('.');
+            while (File.Exists(outPath) && num < 1000000)
+            {
+                fileName = fileName.Insert(ind, $"({num})");
+                outPath = Path.Combine(sourceFiles, fileName);
+                num++;
+            }
+            return fileName;
         }
     }
 }
