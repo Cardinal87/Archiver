@@ -81,6 +81,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         fileZone.style.display = 'none';
     });
 
+    document.getElementById('cancel').addEventListener('click', async () => {
+        await chrome.storage.local.clear();
+    }); 
+
+    document.getElementById('save').addEventListener('click', async () => {
+        const formData = new FormData()
+        textFiles.forEach((file, index) => {
+            formData.append(`TextFiles[${index}].File`, file);
+            formData.append(`TextFiles[${index}].Options.ConvertToPdf`, false);
+        });
+        images.forEach((file, index) => {
+            formData.append(`Images[${index}].File`, file);
+            formData.append(`Images[${index}].Options.ConvertToPdf`, false);
+        });
+        otherFiles.forEach((file, index) => {
+            formData.append(`OtherFile[${index}]`, file);
+        });
+
+        const resp = await fetch(`http://localhost:5091/api/converter/parse`, {
+            method: 'POST',
+            body: formData
+        });
+        await chrome.storage.local.clear();
+        if (resp.ok) {
+            fileZone.style.display = 'none';
+            document.getElementById('resp-s').style.display = 'inline-block';
+            setTimeout(() => {
+                document.getElementById('resp-s').style.display = 'none';
+                fileZone.style.display = 'none';
+                dropZone.style.display = 'inline-block';
+            }, 1000);
+        }
+        else {
+            fileZone.style.display = 'none';
+            document.getElementById('resp-b').style.display = 'inline-block';
+            document.getElementById('resp-mes').innerHTML = resp.statusText;
+        }
+
+    });
+    document.getElementById('ok').addEventListener('click', () => {
+        document.getElementById('resp-b').style.display = 'none';
+        dropZone.style.display = 'inline-block';
+        
+    });
+
 });
 
 async function saveToStorage(file) {

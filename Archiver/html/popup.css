@@ -26,6 +26,8 @@
     --ul-scrollbar-thumb-border: #262626;
     --ul-scrollbar-thumb-hover: #606060;
     --warning: #FF2079;
+    --successful-responce: #00FFA3;
+    --bad-response: #FF2079;
 }
 
 
@@ -36,6 +38,14 @@ body {
 div.main{
     height:250px;
     width:200px;
+}
+div.resp-status {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: var(--files-background);
+    border: 1px solid var(--files-border);
+    display: none;
 }
 div.files {
     height: 100%;
@@ -156,7 +166,29 @@ p.file-name{
     margin: 0;
     width: 120px;
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     text-align: left;
+}
+p.resp-s{
+    color: var(--successful-responce);
+    font-size: 16px;
+    margin-top: 100px;
+}
+p.resp-b{
+    color: var(--bad-response);
+    font-size: 16px;
+}
+p.resp-mes{
+    color: var(--bad-response);
+    word-break: inherit;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    font-size: 14px;
+    height: 150px;
+    text-align: left;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 p.warning {
     font-size: 14px;
