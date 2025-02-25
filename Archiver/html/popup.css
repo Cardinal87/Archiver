@@ -7,9 +7,12 @@
     --drag-zone-font-color: #8B8B8B;
     --files-border: #404040;
     --files-background: #1A1A1A;
-    --files-font-color: #E0E0E0;
+    --files-font-color: #D0D0D0;
     --files-icons: #606060;
     --files-icons-hover: #00F0FF;
+    --options-zone-background: #1A1A1A;
+    --options-zone-border: #404040;
+    --options-font-color: #00F0FF;
     --button-save-background: #00F0FF;
     --button-save-border: #00F0FF;
     --button-save-font-color: #0F0F0F;
@@ -28,6 +31,11 @@
     --warning: #FF2079;
     --successful-responce: #00FFA3;
     --bad-response: #FF2079;
+    --checkbox-border: #606060;
+    --checkbox-hover-border: #00F0FF;
+    --checkbox-active-border: #00F0FF;
+    --checkbox-hover-background: #EBF8FF;
+    --separator: #303030;
 }
 
 
@@ -45,6 +53,21 @@ div.resp-status {
     text-align: center;
     background-color: var(--files-background);
     border: 1px solid var(--files-border);
+    display: none;
+}
+div.option{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-left: 8px;
+    margin-top: 10px;
+}
+div.options-zone {
+    height: 100%;
+    width: 100%;
+    background-color: var(--options-zone-background);
+    border: 1px solid var(--options-zone-border);
+    text-align: center;
     display: none;
 }
 div.files {
@@ -82,6 +105,11 @@ h3.files-text {
     margin: 10px 0px 0px 0px;
     font-size: 20px;
     color: var(--files-font-color);
+}
+h3.options-text {
+    color: var(--options-font-color);
+    margin: 10px 0px 0px 0px;
+    font-size: 20px;
 }
 svg.cloud {
     width: 100px;
@@ -152,6 +180,13 @@ ul.files::-webkit-scrollbar-thumb{
 ul.files::-webkit-scrollbar-thumb:hover{
     background-color: var(--ul-scrollbar-thumb-hover);
 }
+ul.options {
+    padding-left: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 140px;
+    margin-bottom: 10px;
+}
 li.file-line {
     display: flex;
     align-items: center;
@@ -195,9 +230,31 @@ p.warning {
     color: var(--warning);
     margin: 0;
     visibility: hidden;
-    
 }
-
+p.option {
+    font-size: 14px;
+    color: var(--files-font-color);
+    width: 160px;
+    text-align: left;
+    margin: 0;
+}
+input.option {
+    width: 17px;
+    height: 17px;
+    border: 1px solid var(--checkbox-border);
+    transition: all 0.3s;
+}
+input.option:hover {
+    border: 1px solid var(--checkbox-hover-border);
+    background-color: var(--checkbox-hover-background);
+}
+input.option:checked {
+    border: 1px solid var(--checkbox-active-border);
+}
+hr.separator{
+    color: var(--separator);
+    border: 1px solid;
+}
 
 @keyframes cancel-pulse{
     0% {

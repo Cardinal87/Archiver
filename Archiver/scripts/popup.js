@@ -56,22 +56,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         else if (allowedImages.has(file.type)) {
-            images.push(file);
+            var fileData = { file: file, options: { convertToPdf: false } };
+            images.push(fileData);
             addFile(file, true);
+            await saveToStorage(fileData, true).catch((error) => console.error(error));
         }
 
         else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
-            textFiles.push(file);
+            var fileData = { file: file, options: { convertToPdf: false } };
+            textFiles.push(fileData);
             addFile(file, true);
+            await saveToStorage(fileData, true).catch((error) => console.error(error));
         }
         else {
             otherFiles.push(file);
             addFile(file, false);
+            await saveToStorage({ file: file }, false).catch((error) => console.error(error));
         }
         dropZone.style.display = 'none';
         document.getElementById('files').style.display = 'inline-block';
-        await saveToStorage(file).catch((error) => console.error(error));
+        
 
+    });
+    
+    document.getElementById('confirm-options').addEventListener('click', () => {
+        var checked = document.getElementById('convert-to-pdf').checked;
+        document.getElementById('files').style.display = 'inline-block';
+        document.getElementById('options-zone').style.display = 'none';
     });
     fileZone.addEventListener('dragenter', (e) => {
         e.preventDefault();
@@ -82,18 +93,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('cancel').addEventListener('click', async () => {
+        document.getElementById('files').style.display = 'none';
+        dropZone.style.display = 'inline-block';
         await chrome.storage.local.clear();
+        
     }); 
 
     document.getElementById('save').addEventListener('click', async () => {
         const formData = new FormData()
         textFiles.forEach((file, index) => {
-            formData.append(`TextFiles[${index}].File`, file);
-            formData.append(`TextFiles[${index}].Options.ConvertToPdf`, false);
+            formData.append(`TextFiles[${index}].File`, file.file);
+            formData.append(`TextFiles[${index}].Options.ConvertToPdf`, file.options.convertToPdf);
         });
         images.forEach((file, index) => {
             formData.append(`Images[${index}].File`, file);
-            formData.append(`Images[${index}].Options.ConvertToPdf`, false);
+            formData.append(`Images[${index}].Options.ConvertToPdf`, file.options.convertToPdf);
         });
         otherFiles.forEach((file, index) => {
             formData.append(`OtherFile[${index}]`, file);
@@ -128,24 +142,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 });
 
-async function saveToStorage(file) {
+async function saveToStorage(file, hasOptions) {
     return new Promise((resolve, reject) => {
         var reader = new FileReader();
 
         reader.onload = async () => {
             let { [STORAGE_KEY]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_KEY);
-            const fileData = {
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                data: reader.result.split(',')[1]
-            };
-
+            let fileData = undefined;
+            if (hasOptions) {
+                fileData = {
+                    name: file.file.name,
+                    type: file.file.type,
+                    size: file.file.size,
+                    data: reader.result.split(',')[1],
+                    options: {
+                        convertToPdf: file.options.convertToPdf
+                    }
+                };
+            }
+            else {
+                fileData = {
+                    name: file.file.name,
+                    type: file.file.type,
+                    size: file.file.size,
+                    data: reader.result.split(',')[1],
+                    
+                };
+            }
             await chrome.storage.local.set({ [STORAGE_KEY]: [...storagedFiles, fileData] });
             resolve();
         };
         reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(file.file);
 
     });
 }
@@ -161,11 +189,11 @@ async function loadFilesFromStorage(){
         const file = new File([array], fileData.name, { type: fileData.type });
         let parts = file.name.split('.');
         if (allowedImages.has(file.type)) {
-            images.push(file);
+            images.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
             addFile(file, true);
         }
         else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
-            textFiles.push(file);
+            images.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
             addFile(file, true);
         }
         else {
@@ -177,7 +205,7 @@ async function loadFilesFromStorage(){
 }
 
 function addFile(file, addBt) {
-    const settingIcon = `<svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24">
+    const settingIcon = `<svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" name="settingsbtn">
     <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 
     15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 
     19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 
@@ -199,6 +227,10 @@ function addFile(file, addBt) {
         li.innerHTML = `${fileIcon}
         <p class="file-name">${file.name}</p>
         ${settingIcon}`;
+        li.querySelector('svg[name="settingsbtn"]').addEventListener('click', () => {
+            document.getElementById('files').style.display = 'none';
+            document.getElementById('options-zone').style.display = 'inline-block';
+        });
     }
     else {
         li.innerHTML = `${fileIcon}
@@ -208,7 +240,6 @@ function addFile(file, addBt) {
     
     const ul = document.getElementById('file-list');
     ul.appendChild(li);
-
 
 }
 
