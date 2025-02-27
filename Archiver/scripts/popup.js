@@ -1,7 +1,12 @@
 const otherFiles = [];
 const images = [];
 const textFiles = [];
-const STORAGE_KEY = "storagedFiles";
+const STORAGE_IMAGES = "storaged_images";
+const STORAGE_TEXT_FILES = "storaged_text_files";
+const STORAGE_OTHER = "storaged_other";
+let ind = "";
+
+
 
 const allowedImages = new Set(["image/jpeg", "image/jpg", "image/png"]);
 const allowedTextFiles = new Set(['txt', 'csv', 'json', 'xml', 'log', 'config', 'ini', 'html', 'htm', 'css', 'py', 'java', 'cs']);
@@ -58,20 +63,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         else if (allowedImages.has(file.type)) {
             var fileData = { file: file, options: { convertToPdf: false } };
             images.push(fileData);
-            addFile(file, true);
-            await saveToStorage(fileData, true).catch((error) => console.error(error));
+            addFile(file, "image");
+            await saveToStorage(fileData, "image").catch((error) => console.error(error));
         }
 
         else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
             var fileData = { file: file, options: { convertToPdf: false } };
             textFiles.push(fileData);
-            addFile(file, true);
-            await saveToStorage(fileData, true).catch((error) => console.error(error));
+            addFile(file, "text");
+            await saveToStorage(fileData, "text").catch((error) => console.error(error));
         }
         else {
             otherFiles.push(file);
-            addFile(file, false);
-            await saveToStorage({ file: file }, false).catch((error) => console.error(error));
+            addFile(file, "other");
+            await saveToStorage({ file: file }, "other").catch((error) => console.error(error));
         }
         dropZone.style.display = 'none';
         document.getElementById('files').style.display = 'inline-block';
@@ -79,8 +84,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     });
     
-    document.getElementById('confirm-options').addEventListener('click', () => {
+    document.getElementById('confirm-options').addEventListener('click', async () => {
         var checked = document.getElementById('convert-to-pdf').checked;
+        let arr = ind.split(';');
+        let file;
+        let type;
+        if (parseInt(arr[0]) == 1) {
+            file = textFiles[parseInt(arr[1])];
+            type = "text";
+        }
+        else if (parseInt(arr[0]) == 2) {
+            images = textFiles[parseInt(arr[1])];
+            type = "image";
+        }
+        ind = "";
+        if (file.options.convertToPdf != checked) {
+            file.options.convertToPdf = checked;
+            updateStorage(type);
+        }
+
+
         document.getElementById('files').style.display = 'inline-block';
         document.getElementById('options-zone').style.display = 'none';
     });
@@ -95,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('cancel').addEventListener('click', async () => {
         document.getElementById('files').style.display = 'none';
         dropZone.style.display = 'inline-block';
+        document.getElementById('file-list').innerHTML = "";
         await chrome.storage.local.clear();
         
     }); 
@@ -142,14 +166,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 });
 
-async function saveToStorage(file, hasOptions) {
+async function saveToStorage(file, type) {
     return new Promise((resolve, reject) => {
         var reader = new FileReader();
 
         reader.onload = async () => {
-            let { [STORAGE_KEY]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_KEY);
             let fileData = undefined;
-            if (hasOptions) {
+            if (type === "text" || type === "image") {
                 fileData = {
                     name: file.file.name,
                     type: file.file.type,
@@ -166,10 +189,22 @@ async function saveToStorage(file, hasOptions) {
                     type: file.file.type,
                     size: file.file.size,
                     data: reader.result.split(',')[1],
-                    
+
                 };
             }
-            await chrome.storage.local.set({ [STORAGE_KEY]: [...storagedFiles, fileData] });
+            if (type === "text") {
+                let { [STORAGE_TEXT_FILES]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_TEXT_FILES);
+                await chrome.storage.local.set({ [STORAGE_TEXT_FILES]: [...storagedFiles, fileData] });
+            }
+            else if (type === "image") {
+                let { [STORAGE_IMAGES]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_IMAGES);
+                await chrome.storage.local.set({ [STORAGE_IMAGES]: [...storagedFiles, fileData] });
+            }
+            else {
+                let { [STORAGE_OTHER]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_OTHER);
+                await chrome.storage.local.set({ [STORAGE_OTHER]: [...storagedFiles, fileData] });
+            }
+            
             resolve();
         };
         reader.onerror = (error) => reject(error);
@@ -178,33 +213,62 @@ async function saveToStorage(file, hasOptions) {
     });
 }
 
-async function loadFilesFromStorage(){
-    let { [STORAGE_KEY]: storagedFiles = [] } = await chrome.storage.local.get(STORAGE_KEY);
-    for (var fileData of storagedFiles) {
+
+async function updateStorage(type) {
+    if (type === "text") {
+
+        await chrome.storage.local.remove(STORAGE_TEXT_FILES);
+        for (let file of textFiles) {
+            saveToStorage(file, "text");
+        }
+    }
+    else if (type === "image") {
+        await chrome.storage.local.remove(STORAGE_IMAGES);
+        for (let file of textFiles) {
+            saveToStorage(file, "image");
+        }
+    }
+}
+
+
+
+async function loadFilesFromStorage() {
+    let { [STORAGE_TEXT_FILES]: storagedText = [] } = await chrome.storage.local.get(STORAGE_TEXT_FILES);
+    for (var fileData of storagedText) {
         const byteStr = atob(fileData.data);
         const array = new Uint8Array(byteStr.length);
         for (let i = 0; i < array.length; i++) {
             array[i] = byteStr.charCodeAt(i);
         }
         const file = new File([array], fileData.name, { type: fileData.type });
-        let parts = file.name.split('.');
-        if (allowedImages.has(file.type)) {
-            images.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
-            addFile(file, true);
+        textFiles.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
+        addFile(file, "text");
+    }
+    let { [STORAGE_IMAGES]: storagedimages = [] } = await chrome.storage.local.get(STORAGE_IMAGES);
+    for (var fileData of storagedimages) {
+        const byteStr = atob(fileData.data);
+        const array = new Uint8Array(byteStr.length);
+        for (let i = 0; i < array.length; i++) {
+            array[i] = byteStr.charCodeAt(i);
         }
-        else if (parts.length > 1 && allowedTextFiles.has(parts.pop())) {
-            images.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
-            addFile(file, true);
+        const file = new File([array], fileData.name, { type: fileData.type });
+        images.push({ file: file, options: { convertToPdf: fileData.options.convertToPdf } });
+        addFile(file, "image");
+    }
+    let { [STORAGE_OTHER]: storragedOther = [] } = await chrome.storage.local.get(STORAGE_OTHER);
+    for (var fileData of storragedOther) {
+        const byteStr = atob(fileData.data);
+        const array = new Uint8Array(byteStr.length);
+        for (let i = 0; i < array.length; i++) {
+            array[i] = byteStr.charCodeAt(i);
         }
-        else {
-            otherFiles.push(file);
-            addFile(file, false);
-        }
-
+        const file = new File([array], fileData.name, { type: fileData.type });
+        otherFiles.push({ file: file });
+        addFile(file, "other");
     }
 }
 
-function addFile(file, addBt) {
+function addFile(file, type) {
     const settingIcon = `<svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" name="settingsbtn">
     <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 
     15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 
@@ -223,14 +287,23 @@ function addFile(file, addBt) {
 
     const li = document.createElement('li');
     li.className = 'file-line';
-    if (addBt) {
+    if (type === "text" || type === "images") {
         li.innerHTML = `${fileIcon}
         <p class="file-name">${file.name}</p>
         ${settingIcon}`;
-        li.querySelector('svg[name="settingsbtn"]').addEventListener('click', () => {
+        li.querySelector('svg[name="settingsbtn"]').addEventListener('click', (e) => {
             document.getElementById('files').style.display = 'none';
             document.getElementById('options-zone').style.display = 'inline-block';
+            ind = e.currentTarget.id;
         });
+        if (type === "image") {
+            let curInd = `2;${images.length - 1}`;
+            li.querySelector('svg[name="settingsbtn"]').id = curInd;
+        }
+        else {
+            let curInd = `1;${textFiles.length - 1}`;
+            li.querySelector('svg[name="settingsbtn"]').id = curInd;
+        }
     }
     else {
         li.innerHTML = `${fileIcon}
