@@ -8,16 +8,23 @@
 <body>
     <div class="overlay" id="overlay"></div>
     <div class="main">
-        <p class="text">out path: </p>
-        <p class="path" id="path">/</p>
-        <button class="browse" id="browse">
-            Select file
-        </button>
+        <h1 class="settings-header">Settings</h1>
+        <div class="path-info">
+            <p class="text">out path: </p>
+            <p class="path" id="path">root folder now</p>
+            <button class="browse" id="browse">
+                Select file
+            </button>
+        </div>
     </div>
     <div class="form" id="form">
-        <input type="text" id="path-input"/>
-        <button id="confirm">Confirm</button>
-        <button id="cancel">Cancel</button>
+        <h3 class="form-header">Input path for output directory</h3>
+        <input type="text" id="path-input" class="pathinp" placeholder="input path" />
+        <label for="path-input" id="error" class="error">please enter correct pass</label>
+        <div>
+            <button id="cancel" class="cancel">Cancel</button>
+            <button id="confirm" class="confirm">Confirm</button>
+        </div>
     </div>
     <script src="../scripts/options.js"></script>
 </body>

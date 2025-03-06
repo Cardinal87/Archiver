@@ -1,4 +1,30 @@
 :root {
+    --background: #1A1A1A;
+    --font: #8B8B8B;
+    --path-font: #B0B0B0;
+    --browse-background: #2E2E2E;
+    --browse-border: #404040;
+    --browse-text: #C0C0C0;
+    --browse-hover-background: #363636;
+    --browse-hover-border: #505050;
+    --form-background: #151515;
+    --header: #D0D0D0;
+    --confirm-background: #2E6B8F;
+    --confirm-border: #3A8FBA;
+    --confirm-text: #FFFFFF;
+    --confirm-hover: #3A8FBA;
+    --cancel-background: #404040;
+    --cancel-border: #505050;
+    --cancel-text: #C0C0C0;
+    --cancel-hover: #505050;
+    --input-placeholder: #707070;
+    --input-hover-background: #404040;
+    --input-hover-border: #1E1E1E;
+    --input-border: #303030;
+    --input-background: #1A1A1A;
+    --input-focus-border: #3A8FBA;
+    --input-font: #C0C0C0;
+    --error: #FF2079;
 }
 html, body {
     margin: 0;
@@ -14,15 +40,29 @@ div.main{
     display: flex;
     justify-content: left;
     align-items: flex-start;
+    background-color: var(--background);
+    flex-direction: column;
+}
+div.path-info{
+    width: 100%;
+    display:flex;
+    margin-top: 65px;
 }
 div.form {
     position: fixed;
+    width: 250px;
+    height: 120px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1001;
     border-radius: 10px;
     display: none;
+    justify-content: center;
+    flex-direction: column;
+    align-content: flex-start;
+    background-color: var(--form-background);
+    padding: 10px;
 }
 div.overlay {
     z-index: 1000;
@@ -31,21 +71,76 @@ div.overlay {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.85);
     display: none;
 }
 p.text{
-    font-size: 15px;
-    margin: 30px 0px 0px 30px;
-
+    font-size: 17px;
+    margin: 0px 10px 0px 80px;
+    color: var(--font);
 }
 p.path {
     width: 70%;
-    font-size: 15px;
+    font-size: 17px;
+    margin: 0px 0px 0px 0px;
+    color: var(--path-font);
 }
-input.path::file-selector-button{
-    display: none;
+h3.form-header{
+    font-size: 15px;
+    color: var(--header);
+    margin: 0px 0px 10px 0px;
+}
+h1.settings-header{
+    color: var(--font);
+    font-size: 30px;
 }
 button.browse {
-    margin: 0;
+    background-color: var(--browse-background);
+    border: 1px solid var(--browse-border);
+    color: var(--browse-text);
+    margin: 0px 0px 0px 30px;
+    font-size: 17px;
+}
+button.browse:hover{
+    background-color: var(--browse-hover-background);
+    border-color: var(--browse-hover-border);
+}
+
+button.confirm{
+    background-color: var(--confirm-background);
+    border: 1px solid var(--confirm-border);
+    color: var(--confirm-text);
+}
+button.confirm:hover {
+    background-color: var(--confirm-hover);
+   
+}
+button.cancel {
+    margin: 35px 5px 0px 120px;
+    background-color: var(--cancel-background);
+    border: 1px solid var(--cancel-border);
+    color: var(--cancel-text);
+}
+button.cancel:hover {
+    background-color: var(--cancel-hover);
+}
+input.pathinp{
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--input-font);
+    height: 18px;
+}
+input.pathinp:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+}
+input.pathinp:hover:not(:focus) {
+    border-color: var(--input-hover-border);
+    background-color: var(--input-hover-background);
+}
+label.error {
+    margin: 0px 0px 0px 3px;
+    color: var(--error);
+    visibility: hidden;
 }
