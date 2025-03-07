@@ -1,6 +1,7 @@
 using Archiver.API.DTO.Request;
 using Microsoft.AspNetCore.Http.Features;
 using System.Net;
+using Newtonsoft;
 
 namespace Archiver.API
 {
@@ -32,7 +33,7 @@ namespace Archiver.API
         }
         private static void ConfigureServices(IServiceCollection services, IConfiguration conf)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddCors(set =>
             {
                 set.AddPolicy("MainPolicy", opt => {

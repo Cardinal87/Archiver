@@ -1,19 +1,12 @@
-﻿using PuppeteerSharp;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.IO.Compression;
-using Tesseract;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using iText.Kernel.Pdf;
-using iText.Layout;
-using iText.Kernel.Pdf.Event;
-using iText.Layout.Element;
-using iText.Layout.Properties;
+
 using Archiver.API.Helpers;
-using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Archiver.API.DTO.Request;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 
 
@@ -37,6 +30,10 @@ namespace Archiver.API.Controllers
         {
             try
             {
+                if (!Directory.Exists(_options.outputDir))
+                {
+                    return BadRequest(new { Message = "output folder does not exist" });
+                }
                 var saver = new FileSaver();
 
                 await saver.HanldeHtml(model.HtmlUrls);
@@ -51,7 +48,27 @@ namespace Archiver.API.Controllers
                 return Problem(ex.Message);
             }
         }
-
+        [HttpPost("savepath")]
+        [Consumes("applicetion/json")]
+        public async Task<IActionResult> SavePath([FromBody] JObject data)
+        {
+            string path = data["data"]?["path"]?.ToString()!;
+            if (!String.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                string config = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+                var jObj = JsonConvert.DeserializeObject<JObject>(System.IO.File.ReadAllText(config)) ?? throw new FileNotFoundException($"appsettings.json by path {config} was not found");
+                var section = jObj["OutputOptions"]!;
+                section["Path"] = path;
+                jObj["OutputOptions"] = JObject.Parse(JsonConvert.SerializeObject(section));
+                string json = JsonConvert.SerializeObject(jObj, Formatting.Indented);
+                await System.IO.File.WriteAllTextAsync(config, json);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(new { Message = "directory does not exist" });
+            }
+        }
 
     }
 }
